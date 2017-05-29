@@ -1,25 +1,14 @@
----
-title: <center>Reproducible Research <br><br> Course Project 1 </center>
-output:
-  html_document:
-    toc: true
-    toc_depth: 2
-    number_sections: TRUE
-    keep_md: true
----
+# <center>Reproducible Research <br><br> Course Project 1 </center>
 
 # Call libraries
 
 Set default for chunks
-```{r setup, echo = FALSE}
-knitr::opts_chunk$set(root.dir = 'C:/Users/sb042583/Documents/R/reproducible_research')
-knitr::opts_chunk$set(fig.path = "./images/")
-                      
-```
+
 
 
 Install Libraries and packages
-```{r libs, echo = TRUE, message= FALSE}
+
+```r
 library(dplyr)
 library(data.table)
 library(ggplot2)
@@ -29,21 +18,24 @@ library(lattice)
 # Load the data
 
 Download zip file
-```{r dataset, message = FALSE}
+
+```r
 temp <- tempfile()
 download.file("https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip",temp)
 ## Unzip the files
 ```
 
 Load the data
-```{r}
+
+```r
 data <- read.csv(unzip(temp), header = TRUE, sep = ",", na.strings = "NA" )
 data <- mutate(data, date = as.Date(date))
 ```
 
 # Calculate the mean of steps taken per day
 
-```{r}
+
+```r
 # Find the number of total steps per day
 totalSteps_day <- group_by(data, date) %>%
   summarise(total_steps = sum(steps, na.rm = TRUE)/1000)
@@ -56,22 +48,37 @@ ggplot(totalSteps_day, aes(totalSteps_day$total_steps)) +
                      breaks = seq(0, 24, 2), limits = c(-1, 24)) +
   scale_y_continuous(name = "Frequency (thousands)") +
   ggtitle("Frequency histogram of total number of steps per day")
+```
 
+![](./images/unnamed-chunk-2-1.png)<!-- -->
+
+```r
 # Calculate the mean of total steps per day
 meanSteps <- mean(totalSteps_day$total_steps)
 meanSteps
+```
 
+```
+## [1] 9.35423
+```
+
+```r
 # Calculate the median of total steps per day
 medSteps <- median(totalSteps_day$total_steps)
 medSteps
 ```
 
-The mean of steps per day is `r meanSteps` and the median is `r medSteps`.
+```
+## [1] 10.395
+```
+
+The mean of steps per day is 9.3542295 and the median is 10.395.
 
 # Average daily activity pattern
 
 
-```{r}
+
+```r
 # Find the median of steps per interval
 meanSteps_interv <- group_by(data, interval) %>%
   summarise(average_steps = mean(steps, na.rm = TRUE))
@@ -83,13 +90,16 @@ ggplot(meanSteps_interv, aes(interval, average_steps)) +
   ggtitle("Average Steps Taken at 5 minute Intervals")
 ```
 
-´The interval with the maximum number of steps is the interval `r meanSteps_interv$interval[which.max(meanSteps_interv$average_steps)]`
+![](./images/unnamed-chunk-3-1.png)<!-- -->
+
+Â´The interval with the maximum number of steps is the interval 835
 
 # Imputing missing values
 
-The total number of missing values in the dataset is `r sum(is.na(data))`. We will fill the missing values with the mean for that 5-minute interval:
+The total number of missing values in the dataset is 2304. We will fill the missing values with the mean for that 5-minute interval:
 
-```{r}
+
+```r
 # Create a new dataset to fill the missing values
 data_fill <- data
 
@@ -101,9 +111,14 @@ for(i in which(is.na(data))){
 # Check if there is any missing value in the filled dataset
 sum(is.na(data_fill))
 ```
+
+```
+## [1] 0
+```
 We created a new dataset: data_fill with the missing data filled in.
 
-```{r}
+
+```r
 # Find the number of total steps per day
 totalSteps_day_fill <- group_by(data_fill, date) %>%
   summarise(total_steps = sum(steps, na.rm = TRUE)/1000)
@@ -116,28 +131,43 @@ ggplot(totalSteps_day_fill, aes(totalSteps_day_fill$total_steps)) +
                      breaks = seq(0, 24, 2), limits = c(-1, 24)) +
   scale_y_continuous(name = "Frequency (thousands)") +
   ggtitle("Frequency histogram of total number of steps per day with filled missings")
+```
 
+![](./images/unnamed-chunk-5-1.png)<!-- -->
+
+```r
 # Calculate the mean of total steps per day
 meanSteps <- mean(totalSteps_day_fill$total_steps)
 meanSteps
+```
 
+```
+## [1] 10.76619
+```
+
+```r
 # Calculate the median of total steps per day
 medSteps <- median(totalSteps_day_fill$total_steps)
 medSteps
 ```
 
+```
+## [1] 10.76619
+```
 
-The mean of steps, with the filled missings, per day is `r meanSteps` and the median is `r medSteps`. With the missings filled, the mean and median have gone up.
+
+The mean of steps, with the filled missings, per day is 10.7661887 and the median is 10.7661887. With the missings filled, the mean and median have gone up.
 
 
 # Weekdays x Weekends
 
 We are looking to see if there are differences in the patterns between weekdays and weekends:
 
-```{r}
+
+```r
 # Lets create the factor variable "week_day" with two levels: "weekday" or "weekend"
 data_fill <- mutate(data_fill, week_day = ifelse(
-  weekdays(data_fill$date) %in% c("sábado", "domingo"), "weekend", "weekday"))
+  weekdays(data_fill$date) %in% c("sÃ¡bado", "domingo"), "weekend", "weekday"))
 
 # Calculate the average number of steps taken by interval and type of week day
 meanSteps_weekdays <-
@@ -148,6 +178,8 @@ meanSteps_weekdays <-
 xyplot(average_steps ~ interval | week_day, data = meanSteps_weekdays, type = "l", layout = 
          c(1, 2), xlab = "Interval", ylab = "Number of steps")
 ```
+
+![](./images/unnamed-chunk-6-1.png)<!-- -->
 
 
 
